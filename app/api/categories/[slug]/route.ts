@@ -8,26 +8,35 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     // Decode the slug to handle URL encoding
     const decodedSlug = decodeURIComponent(slug)
 
-    // Convert slug back to category name with better handling
-    const categoryName = decodedSlug
-      .split("-")
-      .map(word => {
-        // Handle special cases for Russian characters
-        if (word === "летние") return "Летние"
-        if (word === "программы") return "программы"
-        if (word === "стартап") return "Стартап"
-        if (word === "конкурсы") return "конкурсы"
-        if (word === "олимпиады") return "Олимпиады"
-        if (word === "хакатоны") return "Хакатоны"
-        if (word === "эссе") return "Эссе"
-        if (word === "дизайна") return "дизайна"
-        if (word === "научные") return "Научные"
-        if (word === "конференции") return "конференции"
-        if (word === "акселераторы") return "Акселераторы"
-        // Default capitalization
-        return word.charAt(0).toUpperCase() + word.slice(1)
-      })
-      .join(" ")
+    // Convert English slug back to Cyrillic category name
+    const getCyrillicCategoryName = (englishSlug: string) => {
+      const reverseSlugMap: { [key: string]: string } = {
+        'olympiads': 'Олимпиады',
+        'hackathons': 'Хакатоны',
+        'startup-competitions': 'Стартап конкурсы',
+        'essay-competitions': 'Конкурсы Эссе',
+        'summer-programs': 'Летние программы',
+        'internships': 'Стажировки',
+        'volunteer-organizations': 'Волонтерские организации',
+        'debates': 'Дебаты',
+        'mun': 'MUN',
+        'arts': 'Искусство',
+        'sports': 'Спорт',
+        'research': 'Исследования',
+        'interdisciplinary': 'Междисциплинарные',
+        'natural-sciences': 'Естественные науки',
+        'entrepreneurship': 'Предпринимательство',
+        'stem': 'STEM',
+        'academic-courses': 'Академические курсы',
+        'computer-sciences': 'Компьютерные науки',
+        'accelerators': 'Акселераторы',
+        'design-competitions': 'Конкурсы дизайна',
+        'scientific-conferences': 'Научные конференции'
+      }
+      return reverseSlugMap[englishSlug] || englishSlug
+    }
+
+    const categoryName = getCyrillicCategoryName(decodedSlug)
 
     console.log("Fetching category data:", {
       slug,

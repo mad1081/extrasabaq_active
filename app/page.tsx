@@ -43,6 +43,34 @@ const iconMap: { [key: string]: any } = {
   "Circle": Zap, // Fallback
 }
 
+// Convert Cyrillic slugs to English
+const getEnglishSlug = (slug: string) => {
+  const slugMap: { [key: string]: string } = {
+    'олимпиады': 'olympiads',
+    'хакатоны': 'hackathons', 
+    'стартап-конкурсы': 'startup-competitions',
+    'конкурсы-эссе': 'essay-competitions',
+    'летние-программы': 'summer-programs',
+    'стажировки': 'internships',
+    'волонтерские-организации': 'volunteer-organizations',
+    'дебаты': 'debates',
+    'mun': 'mun',
+    'искусство': 'arts',
+    'спорт': 'sports',
+    'исследования': 'research',
+    'междисциплинарные': 'interdisciplinary',
+    'естественные-науки': 'natural-sciences',
+    'предпринимательство': 'entrepreneurship',
+    'stem': 'stem',
+    'академические-курсы': 'academic-courses',
+    'компьютерные-науки': 'computer-sciences',
+    'акселераторы': 'accelerators',
+    'конкурсы-дизайна': 'design-competitions',
+    'научные-конференции': 'scientific-conferences'
+  }
+  return slugMap[slug] || slug
+}
+
 export default function HomePage() {
   const [featuredCompetitions, setFeaturedCompetitions] = useState([])
   const [categories, setCategories] = useState([])
@@ -147,7 +175,7 @@ export default function HomePage() {
                 return (
                   <Link
                     key={category.slug || index}
-                    href={`/category/${category.slug}`}
+                    href={`/category/${getEnglishSlug(category.slug)}`}
                   >
                     <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
                       <CardContent className="p-6 text-center">
@@ -280,22 +308,22 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Категории</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/category/olympiads" className="hover:text-white" prefetch={false}>
                     Олимпиады
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/category/hackathons" className="hover:text-white" prefetch={false}>
                     Хакатоны
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/category/startup-competitions" className="hover:text-white" prefetch={false}>
                     Стартапы
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-white">
+                  <Link href="/category/summer-programs" className="hover:text-white" prefetch={false}>
                     Летние программы
                   </Link>
                 </li>
