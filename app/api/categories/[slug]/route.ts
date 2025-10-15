@@ -4,9 +4,12 @@ import { createServerClient } from "@/lib/supabase"
 export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
     const { slug } = await params
-    
+
+    // Decode the slug to handle URL encoding
+    const decodedSlug = decodeURIComponent(slug)
+
     // Convert slug back to category name with better handling
-    const categoryName = slug
+    const categoryName = decodedSlug
       .split("-")
       .map(word => {
         // Handle special cases for Russian characters
@@ -25,6 +28,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         return word.charAt(0).toUpperCase() + word.slice(1)
       })
       .join(" ")
+
+    console.log("Fetching category data:", {
+      slug,
+      decodedSlug,
+      categoryName
+    })
 
     const supabase = createServerClient()
 
