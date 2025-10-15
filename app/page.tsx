@@ -260,17 +260,17 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/team" className="hover:text-white">
+                  <Link href="/team" className="hover:text-white" prefetch={false}>
                     Команды
                   </Link>
                 </li>
                 <li>
-                  <Link href="/community" className="hover:text-white">
+                  <Link href="/community" className="hover:text-white" prefetch={false}>
                     Сообщество
                   </Link>
                 </li>
                 <li>
-                  <Link href="/profile" className="hover:text-white">
+                  <Link href="/profile" className="hover:text-white" prefetch={false}>
                     Профиль
                   </Link>
                 </li>

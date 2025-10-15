@@ -137,19 +137,19 @@ export function CompetitionPageClient({ competition, competitionId }: { competit
               </Link>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium">
+              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium" prefetch={false}>
                 Home
               </Link>
-              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium">
+              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium" prefetch={false}>
                 Team
               </Link>
-              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium">
+              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium" prefetch={false}>
                 Community
               </Link>
-              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium">
+              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium" prefetch={false}>
                 Profile
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium">
+              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium" prefetch={false}>
                 About Us
               </Link>
             </nav>
