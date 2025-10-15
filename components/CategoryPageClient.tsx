@@ -132,19 +132,19 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
               </Link>
             </div>
             <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium">
+              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium" prefetch={false}>
                 Home
               </Link>
-              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium">
+              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium" prefetch={false}>
                 Team
               </Link>
-              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium">
+              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium" prefetch={false}>
                 Community
               </Link>
-              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium">
+              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium" prefetch={false}>
                 Profile
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium">
+              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium" prefetch={false}>
                 About Us
               </Link>
             </nav>
@@ -154,7 +154,7 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
                   <span className="text-sm text-gray-600">
                     Привет, {user.user_metadata?.full_name || user.email}!
                   </span>
-                  <Link href="/profile">
+                  <Link href="/profile" prefetch={false}>
                     <Button variant="outline" size="sm">
                       Профиль
                     </Button>
@@ -445,22 +445,22 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
               <h4 className="font-semibold mb-4">Навигация</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/" className="hover:text-white">
+                  <Link href="/" className="hover:text-white" prefetch={false}>
                     Главная
                   </Link>
                 </li>
                 <li>
-                  <Link href="/team" className="hover:text-white">
+                  <Link href="/team" className="hover:text-white" prefetch={false}>
                     Команды
                   </Link>
                 </li>
                 <li>
-                  <Link href="/community" className="hover:text-white">
+                  <Link href="/community" className="hover:text-white" prefetch={false}>
                     Сообщество
                   </Link>
                 </li>
                 <li>
-                  <Link href="/profile" className="hover:text-white">
+                  <Link href="/profile" className="hover:text-white" prefetch={false}>
                     Профиль
                   </Link>
                 </li>
