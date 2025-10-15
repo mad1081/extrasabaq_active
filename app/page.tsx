@@ -1,6 +1,9 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { useCompetitions } from "@/hooks/useCompetitions"
 import {
   MapPin,
   Search,
@@ -20,95 +23,61 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { useState, useEffect } from "react"
+import { Header } from "@/components/Header"
 
-const activities = [
-  { name: "Олимпиады", icon: Trophy, color: "bg-pink-500", count: 45 },
-  { name: "Хакатоны", icon: Code, color: "bg-orange-500", count: 23 },
-  { name: "Стартап конкурсы", icon: Lightbulb, color: "bg-green-500", count: 18 },
-  { name: "Конкурсы Эссе", icon: PenTool, color: "bg-blue-500", count: 32 },
-  { name: "Летние программы", icon: Sun, color: "bg-yellow-500", count: 15 },
-  { name: "Стажировки", icon: Briefcase, color: "bg-purple-500", count: 28 },
-  { name: "Волонтерские организации", icon: Heart, color: "bg-red-500", count: 12 },
-  { name: "Дебаты", icon: MessageCircle, color: "bg-indigo-500", count: 19 },
-  { name: "MUN", icon: Globe, color: "bg-teal-500", count: 8 },
-  { name: "Искусство", icon: Palette, color: "bg-pink-400", count: 25 },
-  { name: "Спорт", icon: Zap, color: "bg-orange-400", count: 34 },
-]
-
-const recentCompetitions = [
-  {
-    title: "Международная олимпиада по математике",
-    type: "Олимпиада",
-    deadline: "15 февраля 2025",
-    level: "Международный",
-    free: true,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    title: "AI Hackathon 2025",
-    type: "Хакатон",
-    deadline: "28 января 2025",
-    level: "Республиканский",
-    free: false,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-  {
-    title: "Стартап Питч Конкурс",
-    type: "Стартап конкурс",
-    deadline: "10 марта 2025",
-    level: "Региональный",
-    free: true,
-    image: "/placeholder.svg?height=200&width=300",
-  },
-]
+// Icon mapping for dynamic categories
+const iconMap: { [key: string]: any } = {
+  "Trophy": Trophy,
+  "Code": Code,
+  "Lightbulb": Lightbulb,
+  "PenTool": PenTool,
+  "Sun": Sun,
+  "Briefcase": Briefcase,
+  "Heart": Heart,
+  "MessageCircle": MessageCircle,
+  "Globe": Globe,
+  "Palette": Palette,
+  "Zap": Zap,
+  "Rocket": Lightbulb, // Fallback
+  "Circle": Zap, // Fallback
+}
 
 export default function HomePage() {
+  const [featuredCompetitions, setFeaturedCompetitions] = useState([])
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch featured competitions and categories in parallel
+        const [competitionsResponse, categoriesResponse] = await Promise.all([
+          fetch('/api/competitions?featured=true&limit=3'),
+          fetch('/api/categories')
+        ])
+
+        const competitionsData = await competitionsResponse.json()
+        const categoriesData = await categoriesResponse.json()
+
+        if (competitionsResponse.ok) {
+          setFeaturedCompetitions(competitionsData.competitions || [])
+        }
+        if (categoriesResponse.ok) {
+          setCategories(categoriesData.categories || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-orange-50 to-green-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-07-24%20at%2017.14.15-7secNVv7zKkZaAXllG16x72eGCoEmg.jpeg"
-                alt="Extrasabaq Logo"
-                width={120}
-                height={40}
-                className="h-10 w-auto"
-              />
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium">
-                Home
-              </Link>
-              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium">
-                Team
-              </Link>
-              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium">
-                Community
-              </Link>
-              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium">
-                Profile
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium">
-                About Us
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                Войти
-              </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600"
-              >
-                Регистрация
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-12 px-4">
@@ -161,27 +130,40 @@ export default function HomePage() {
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Выберите направление</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {activities.map((activity, index) => {
-              const Icon = activity.icon
-              return (
-                <Link
-                  key={index}
-                  href={`/category/${activity.name.toLowerCase().replace(/\s+/g, "-").replace(/ё/g, "е")}`}
-                >
-                  <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
-                    <CardContent className="p-6 text-center">
-                      <div
-                        className={`${activity.color} rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}
-                      >
-                        <Icon className="h-8 w-8 text-white" />
-                      </div>
-                      <h3 className="font-semibold text-gray-800 mb-2">{activity.name}</h3>
-                      <p className="text-sm text-gray-500">{activity.count} активных</p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              )
-            })}
+            {loading ? (
+              // Loading skeleton for categories
+              Array.from({ length: 8 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardContent className="p-6 text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              categories.map((category: any, index: number) => {
+                const Icon = iconMap[category.icon] || Zap
+                return (
+                  <Link
+                    key={category.slug || index}
+                    href={`/category/${category.slug}`}
+                  >
+                    <Card className="hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group">
+                      <CardContent className="p-6 text-center">
+                        <div
+                          className={`${category.color} rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}
+                        >
+                          <Icon className="h-8 w-8 text-white" />
+                        </div>
+                        <h3 className="font-semibold text-gray-800 mb-2">{category.name}</h3>
+                        <p className="text-sm text-gray-500">{category.count} активных</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                )
+              })
+            )}
           </div>
         </div>
       </section>
@@ -197,39 +179,55 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {recentCompetitions.map((competition, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="relative">
-                  <Image
-                    src={competition.image || "/placeholder.svg"}
-                    alt={competition.title}
-                    width={300}
-                    height={200}
-                    className="w-full h-48 object-cover rounded-t-lg"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
-                        competition.free ? "bg-green-500" : "bg-orange-500"
-                      }`}
-                    >
-                      {competition.free ? "Бесплатно" : "Платно"}
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">{competition.type}</span>
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{competition.level}</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-800 mb-2">{competition.title}</h3>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Calendar className="h-4 w-4" />
-                    Дедлайн: {competition.deadline}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <div className="w-full h-48 bg-gray-200 rounded-t-lg"></div>
+                  <CardContent className="p-6">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              featuredCompetitions.map((competition: any, index: number) => (
+                <Card key={competition.id || index} className="hover:shadow-lg transition-shadow cursor-pointer">
+                  <Link href={`/competition/${competition.id}`}>
+                    <div className="relative">
+                      <Image
+                        src={competition.image_url || "/placeholder.svg"}
+                        alt={competition.title}
+                        width={300}
+                        height={200}
+                        className="w-full h-48 object-cover rounded-t-lg"
+                      />
+                      <div className="absolute top-4 left-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-medium text-white ${
+                            competition.is_free ? "bg-green-500" : "bg-orange-500"
+                          }`}
+                        >
+                          {competition.is_free ? "Бесплатно" : "Платно"}
+                        </span>
+                      </div>
+                    </div>
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs bg-gray-100 px-2 py-1 rounded">{competition.category}</span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">{competition.level}</span>
+                      </div>
+                      <h3 className="font-semibold text-gray-800 mb-2">{competition.title}</h3>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{competition.description}</p>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <Calendar className="h-4 w-4" />
+                        Дедлайн: {new Date(competition.deadline).toLocaleDateString('ru-RU')}
+                      </div>
+                    </CardContent>
+                  </Link>
+                </Card>
+              ))
+            )}
           </div>
           <div className="text-center mt-8">
             <Button variant="outline" size="lg">
@@ -317,6 +315,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      
     </div>
   )
 }

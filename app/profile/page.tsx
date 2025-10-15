@@ -1,39 +1,118 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, Star, Upload, Award, BookOpen, Settings, Edit } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useAuth } from "@/hooks/useAuth"
+import { AuthModal } from "@/components/auth/AuthModal"
+import { Calendar, Star, Upload, Award, BookOpen, Settings, Edit, LogOut } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
-const savedCompetitions = [
-  {
-    title: "Международная олимпиада по математике",
-    type: "Олимпиада",
-    deadline: "15 февраля 2025",
-    image: "/placeholder.svg?height=150&width=200",
-  },
-  {
-    title: "AI Hackathon 2025",
-    type: "Хакатон",
-    deadline: "28 января 2025",
-    image: "/placeholder.svg?height=150&width=200",
-  },
-]
-
-const calendarEvents = [
-  { date: "15 февраля", event: "Дедлайн математической олимпиады", type: "deadline" },
-  { date: "28 января", event: "AI Hackathon регистрация", type: "deadline" },
-  { date: "5 марта", event: "Результаты стартап конкурса", type: "result" },
-]
-
-const achievements = [
-  { name: "Диплом 1 степени - Олимпиада по физике", date: "2024", file: "physics_diploma.pdf" },
-  { name: "Сертификат участника - Hackathon 2024", date: "2024", file: "hackathon_cert.pdf" },
-  { name: "Грамота - Конкурс эссе", date: "2023", file: "essay_award.pdf" },
-]
-
 export default function ProfilePage() {
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<"login" | "register">("login")
+  const [favorites, setFavorites] = useState([])
+  const [calendarEvents, setCalendarEvents] = useState([])
+  const [userProfile, setUserProfile] = useState(null)
+  const [loading, setLoading] = useState(true)
+  
+  const { user, signOut, loading: authLoading } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      fetchUserData()
+    } else {
+      setLoading(false)
+    }
+  }, [user])
+
+  const fetchUserData = async () => {
+    try {
+      // Fetch user profile, favorites and calendar events
+      const [profileResponse, favoritesResponse, calendarResponse] = await Promise.all([
+        fetch(`/api/user/profile?userId=${user?.id}`),
+        fetch(`/api/user/favorites?userId=${user?.id}`),
+        fetch(`/api/user/calendar?userId=${user?.id}`)
+      ])
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json()
+        setUserProfile(profileData.user)
+      }
+
+      if (favoritesResponse.ok) {
+        const favoritesData = await favoritesResponse.json()
+        setFavorites(favoritesData.favorites || [])
+      }
+
+      if (calendarResponse.ok) {
+        const calendarData = await calendarResponse.json()
+        setCalendarEvents(calendarData.calendar || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    // Redirect to home page
+    window.location.href = '/'
+  }
+
+  // Show login form if user is not authenticated
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Войдите в систему</h1>
+          <p className="text-gray-600 mb-6">Для просмотра профиля необходимо войти в аккаунт</p>
+          <div className="space-x-4">
+            <Button 
+              onClick={() => {
+                setAuthMode("login")
+                setAuthModalOpen(true)
+              }}
+            >
+              Войти
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => {
+                setAuthMode("register")
+                setAuthModalOpen(true)
+              }}
+            >
+              Зарегистрироваться
+            </Button>
+          </div>
+          <AuthModal 
+            isOpen={authModalOpen}
+            onClose={() => setAuthModalOpen(false)}
+            defaultMode={authMode}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Загрузка...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
       {/* Header */}
@@ -69,298 +148,270 @@ export default function ProfilePage() {
               </Link>
             </nav>
             <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                <Settings className="h-4 w-4 mr-2" />
-                Настройки
+              <span className="text-sm text-gray-600">
+                Привет, {user?.user_metadata?.full_name || user?.email}!
+              </span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Выйти
               </Button>
             </div>
           </div>
         </div>
       </header>
 
+      {/* Profile Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
       {/* Profile Header */}
-      <section className="py-8 px-4">
-        <div className="container mx-auto">
           <Card className="mb-8">
             <CardContent className="p-8">
-              <div className="flex flex-col md:flex-row items-center gap-6">
-                <div className="relative">
-                  <Image
-                    src="/placeholder.svg?height=120&width=120"
-                    alt="Profile Avatar"
-                    width={120}
-                    height={120}
-                    className="rounded-full border-4 border-white shadow-lg"
-                  />
-                  <Button size="sm" className="absolute bottom-0 right-0 rounded-full p-2">
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                </div>
-                <div className="text-center md:text-left flex-1">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-2">Алексей Иванов</h1>
-                  <p className="text-gray-600 mb-2">@alex_student</p>
-                  <p className="text-gray-500 mb-4">11 класс • Алматы, Казахстан</p>
-                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <Badge variant="secondary">Математика</Badge>
-                    <Badge variant="secondary">Информатика</Badge>
-                    <Badge variant="secondary">Физика</Badge>
+              <div className="flex items-center space-x-6">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={user?.user_metadata?.avatar_url} />
+                  <AvatarFallback className="text-2xl">
+                    {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h1 className="text-3xl font-bold text-gray-800">
+                    {userProfile?.full_name || "Пользователь"}
+                  </h1>
+                  <p className="text-gray-600 mb-2">@{userProfile?.username || "username"}</p>
+                  <p className="text-gray-500 mb-2">{userProfile?.email || user?.email}</p>
+                  
+                  {/* Additional Profile Information */}
+                  <div className="flex items-center space-x-4 text-sm text-gray-600 mb-4">
+                    {userProfile?.grade && (
+                      <span>{userProfile.grade} класс</span>
+                    )}
+                    {userProfile?.city && (
+                      <span>• {userProfile.city}</span>
+                    )}
+                    {userProfile?.school && (
+                      <span>• {userProfile.school}</span>
+                    )}
+                  </div>
+                  
+                  {/* Interests */}
+                  {userProfile?.interests && userProfile.interests.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {userProfile.interests.map((interest: string, index: number) => (
+                        <Badge key={index} variant="secondary">
+                          {interest}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex items-center space-x-4 mt-4">
+                    <Badge variant="outline">
+                      <Star className="h-3 w-3 mr-1" />
+                      {favorites.length} избранных
+                    </Badge>
+                    <Badge variant="outline">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {calendarEvents.length} событий
+                    </Badge>
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div>
-                      <div className="text-2xl font-bold text-blue-500">12</div>
-                      <div className="text-sm text-gray-500">Участий</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-green-500">5</div>
-                      <div className="text-sm text-gray-500">Побед</div>
-                    </div>
-                    <div>
-                      <div className="text-2xl font-bold text-orange-500">8</div>
-                      <div className="text-sm text-gray-500">Команд</div>
-                    </div>
-                  </div>
-                </div>
+                <Button variant="outline">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Редактировать
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
-      </section>
 
-      {/* Profile Content */}
-      <section className="py-8 px-4">
-        <div className="container mx-auto">
-          <Tabs defaultValue="calendar" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="calendar">Календарь</TabsTrigger>
-              <TabsTrigger value="favorites">Избранное</TabsTrigger>
-              <TabsTrigger value="achievements">Достижения</TabsTrigger>
-              <TabsTrigger value="teams">Мои команды</TabsTrigger>
+          {/* Profile Tabs */}
+          <Tabs defaultValue="favorites" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="favorites">
+                <Star className="h-4 w-4 mr-2" />
+                Избранные
+              </TabsTrigger>
+              <TabsTrigger value="calendar">
+                <Calendar className="h-4 w-4 mr-2" />
+                Календарь
+              </TabsTrigger>
+              <TabsTrigger value="achievements">
+                <Award className="h-4 w-4 mr-2" />
+                Достижения
+              </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="calendar">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-500" />
-                    Мой календарь
-                  </CardTitle>
-                  <CardDescription>Важные даты и дедлайны соревнований</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {calendarEvents.map((event, index) => (
-                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="text-center min-w-[80px]">
-                          <div className="text-sm font-medium text-blue-500">{event.date}</div>
+            {/* Favorites Tab */}
+            <TabsContent value="favorites">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-800">Избранные соревнования</h2>
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Добавить достижение
+                  </Button>
+                </div>
+                
+                {favorites.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Нет избранных соревнований
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Добавьте соревнования в избранное, чтобы они отображались здесь
+                    </p>
+                    <Link href="/">
+                      <Button>Найти соревнования</Button>
+                    </Link>
+                  </Card>
+                ) : (
+                  <div className="grid gap-4">
+                    {favorites.map((favorite: any) => (
+                      <Card key={favorite.id} className="hover:shadow-lg transition-shadow">
+                        <div className="flex">
+                          <div className="relative w-48">
+                            <Image
+                              src={favorite.competitions?.image_url || "/placeholder.svg"}
+                              alt={favorite.competitions?.title}
+                              width={200}
+                              height={150}
+                              className="w-full h-32 object-cover rounded-l-lg"
+                            />
+                          </div>
+                          <div className="flex-1 p-6">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <Badge variant="outline" className="mb-2">
+                                  {favorite.competitions?.category}
+                                </Badge>
+                                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                                  {favorite.competitions?.title}
+                                </h3>
+                                <p className="text-gray-600 mb-3 line-clamp-2">
+                                  {favorite.competitions?.description}
+                                </p>
+                                <div className="flex items-center text-sm text-gray-500">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  Дедлайн: {new Date(favorite.competitions?.deadline).toLocaleDateString('ru-RU')}
+                                </div>
+                              </div>
+                              <div className="flex flex-col space-y-2">
+                                <Link href={`/competition/${favorite.competitions?.id}`}>
+                                  <Button size="sm">Подробнее</Button>
+                                </Link>
+                                <Button variant="outline" size="sm">
+                                  Удалить из избранного
+                                </Button>
+                              </div>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                          <p className="font-medium">{event.event}</p>
                         </div>
-                        <Badge variant={event.type === "deadline" ? "destructive" : "default"}>
-                          {event.type === "deadline" ? "Дедлайн" : "Результат"}
-                        </Badge>
-                      </div>
+                      </Card>
                     ))}
                   </div>
-                  <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg text-center">
-                    <Calendar className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                    <p className="text-gray-600">Интеграция с календарем</p>
-                    <Button className="mt-4 bg-transparent" variant="outline">
-                      Синхронизировать с Google Calendar
-                    </Button>
+                )}
                   </div>
-                </CardContent>
-              </Card>
             </TabsContent>
 
-            <TabsContent value="favorites">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-yellow-500" />
-                    Избранные соревнования
-                  </CardTitle>
-                  <CardDescription>Соревнования, которые вас интересуют</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {savedCompetitions.map((competition, index) => (
-                      <Card key={index} className="hover:shadow-md transition-shadow">
-                        <div className="relative">
-                          <Image
-                            src={competition.image || "/placeholder.svg"}
-                            alt={competition.title}
-                            width={200}
-                            height={150}
-                            className="w-full h-32 object-cover rounded-t-lg"
-                          />
-                          <Button size="sm" variant="secondary" className="absolute top-2 right-2">
-                            <Star className="h-3 w-3 fill-current" />
+            {/* Calendar Tab */}
+            <TabsContent value="calendar">
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-800">Календарь событий</h2>
+                
+                {calendarEvents.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                      Нет запланированных событий
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                      Добавьте соревнования в календарь, чтобы не пропустить важные даты
+                    </p>
+                    <Link href="/">
+                      <Button>Найти соревнования</Button>
+                    </Link>
+                  </Card>
+                ) : (
+                  <div className="space-y-4">
+                    {calendarEvents.map((event: any) => (
+                      <Card key={event.id}>
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="text-center min-w-[100px]">
+                                <div className="text-sm font-medium text-blue-500">
+                                  {new Date(event.competitions?.deadline).toLocaleDateString('ru-RU')}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {new Date(event.competitions?.deadline).toLocaleTimeString('ru-RU', { 
+                                    hour: '2-digit', 
+                                    minute: '2-digit' 
+                                  })}
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-800">
+                                  {event.competitions?.title}
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                  {event.competitions?.description}
+                                </p>
+                                {event.notes && (
+                                  <p className="text-sm text-blue-600 mt-1">
+                                    Заметка: {event.notes}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Link href={`/competition/${event.competitions?.id}`}>
+                                <Button size="sm" variant="outline">Подробнее</Button>
+                              </Link>
+                              <Button size="sm" variant="outline">
+                                Удалить из календаря
                           </Button>
                         </div>
-                        <CardContent className="p-4">
-                          <Badge variant="outline" className="mb-2">
-                            {competition.type}
-                          </Badge>
-                          <h3 className="font-semibold mb-2">{competition.title}</h3>
-                          <p className="text-sm text-gray-500">Дедлайн: {competition.deadline}</p>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </div>
             </TabsContent>
 
+            {/* Achievements Tab */}
             <TabsContent value="achievements">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Award className="h-5 w-5 text-green-500" />
-                    Мои достижения
-                  </CardTitle>
-                  <CardDescription>Дипломы, грамоты и сертификаты</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {achievements.map((achievement, index) => (
-                      <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="p-3 bg-green-100 rounded-full">
-                          <Award className="h-6 w-6 text-green-500" />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-medium">{achievement.name}</h3>
-                          <p className="text-sm text-gray-500">{achievement.date}</p>
-                        </div>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-800">Мои достижения</h2>
                         <Button variant="outline" size="sm">
-                          <BookOpen className="h-4 w-4 mr-2" />
-                          Просмотр
+                    <Upload className="h-4 w-4 mr-2" />
+                    Загрузить документ
                         </Button>
                       </div>
-                    ))}
-                  </div>
-                  <div className="mt-6 p-6 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">Загрузите новые достижения</p>
+                
+                <Card className="p-8 text-center">
+                  <Award className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                    Пока нет загруженных достижений
+                  </h3>
+                  <p className="text-gray-500 mb-4">
+                    Загружайте дипломы, сертификаты и другие документы о ваших достижениях
+                  </p>
                     <Button>
                       <Upload className="h-4 w-4 mr-2" />
-                      Загрузить файл
+                    Загрузить первое достижение
                     </Button>
-                  </div>
-                </CardContent>
               </Card>
-            </TabsContent>
-
-            <TabsContent value="teams">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Мои команды</CardTitle>
-                  <CardDescription>Команды, в которых вы участвуете</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-12">
-                    <div className="text-gray-400 mb-4">
-                      <svg className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1}
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-                    </div>
-                    <p className="text-gray-500 mb-4">У вас пока нет активных команд</p>
-                    <Button asChild>
-                      <Link href="/team">Найти команду</Link>
-                    </Button>
                   </div>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-07-24%20at%2017.14.15-7secNVv7zKkZaAXllG16x72eGCoEmg.jpeg"
-                alt="Extrasabaq Logo"
-                width={120}
-                height={40}
-                className="h-10 w-auto mb-4 brightness-0 invert"
-              />
-              <p className="text-gray-400">Платформа для поиска соревнований и формирования команд</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Навигация</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="/" className="hover:text-white">
-                    Главная
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/team" className="hover:text-white">
-                    Команды
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/community" className="hover:text-white">
-                    Сообщество
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/profile" className="hover:text-white">
-                    Профиль
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Категории</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>
-                  <Link href="#" className="hover:text-white">
-                    Олимпиады
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white">
-                    Хакатоны
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white">
-                    Стартапы
-                  </Link>
-                </li>
-                <li>
-                  <Link href="#" className="hover:text-white">
-                    Летние программы
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-4">Контакты</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>info@extrasabaq.com</li>
-                <li>+7 (XXX) XXX-XX-XX</li>
-                <li>Алматы, Казахстан</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Extrasabaq. Все права защищены.</p>
           </div>
         </div>
-      </footer>
     </div>
   )
 }

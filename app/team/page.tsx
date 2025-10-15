@@ -1,103 +1,40 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Header } from "@/components/Header"
 import { Plus, Filter, Users, Calendar, MessageCircle, Search } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-
-const teamPosts = [
-  {
-    id: 1,
-    title: "Ищем программистов для AI Hackathon",
-    event: "AI Hackathon 2025",
-    type: "Хакатон",
-    subject: "Информатика",
-    needed: 2,
-    ageLimit: "16-18 лет",
-    author: "alex_dev",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    postedDate: "2 дня назад",
-    description: "Ищем опытных разработчиков для участия в хакатоне по ИИ. Нужны знания Python, ML.",
-  },
-  {
-    id: 2,
-    title: "Команда для математической олимпиады",
-    event: "Международная олимпиада по математике",
-    type: "Олимпиада",
-    subject: "Математика",
-    needed: 1,
-    ageLimit: "15-17 лет",
-    author: "math_genius",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    postedDate: "1 день назад",
-    description: "Собираем сильную команду для участия в международной олимпиаде.",
-  },
-  {
-    id: 3,
-    title: "Стартап команда - ищем маркетолога",
-    event: "Startup Weekend",
-    type: "Стартап конкурс",
-    subject: "Бизнес",
-    needed: 1,
-    ageLimit: "16-19 лет",
-    author: "startup_leader",
-    authorAvatar: "/placeholder.svg?height=40&width=40",
-    postedDate: "3 дня назад",
-    description: "У нас есть идея и разработчики, нужен креативный маркетолог для завершения команды.",
-  },
-]
+import { useState, useEffect } from "react"
 
 export default function TeamPage() {
+  const [teamPosts, setTeamPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchTeamPosts = async () => {
+      try {
+        const response = await fetch('/api/team-posts')
+        const data = await response.json()
+        if (response.ok) {
+          setTeamPosts(data.teamPosts || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch team posts:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTeamPosts()
+  }, [])
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-07-24%20at%2017.14.15-7secNVv7zKkZaAXllG16x72eGCoEmg.jpeg"
-                  alt="Extrasabaq Logo"
-                  width={120}
-                  height={40}
-                  className="h-10 w-auto"
-                />
-              </Link>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium">
-                Home
-              </Link>
-              <Link href="/team" className="text-orange-500 font-medium">
-                Team
-              </Link>
-              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium">
-                Community
-              </Link>
-              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium">
-                Profile
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-purple-500 font-medium">
-                About Us
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                Войти
-              </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600"
-              >
-                Регистрация
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-12 px-4">
@@ -166,63 +103,86 @@ export default function TeamPage() {
       <section className="py-12 px-4">
         <div className="container mx-auto">
           <div className="grid gap-6">
-            {teamPosts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">{post.type}</Badge>
-                        <Badge variant="outline">{post.subject}</Badge>
-                        <span className="text-sm text-gray-500">{post.postedDate}</span>
-                      </div>
-                      <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
-                      <CardDescription className="text-base">{post.description}</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-3 ml-4">
-                      <Image
-                        src={post.authorAvatar || "/placeholder.svg"}
-                        alt={post.author}
-                        width={40}
-                        height={40}
-                        className="rounded-full"
-                      />
-                      <div className="text-right">
-                        <p className="font-medium text-sm">{post.author}</p>
-                        <Button size="sm" variant="outline" className="mt-1 bg-transparent">
-                          <MessageCircle className="h-3 w-3 mr-1" />
-                          Написать
-                        </Button>
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="animate-pulse">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                        <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-full"></div>
                       </div>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-600">Мероприятие:</span>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              teamPosts.map((post: any) => (
+                <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary">{post.category}</Badge>
+                          <Badge variant="outline">{post.subject}</Badge>
+                          <span className="text-sm text-gray-500">
+                            {new Date(post.created_at).toLocaleDateString('ru-RU')}
+                          </span>
+                        </div>
+                        <CardTitle className="text-xl mb-2">{post.title}</CardTitle>
+                        <CardDescription className="text-base">{post.description}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-3 ml-4">
+                        <Image
+                          src={post.users?.avatar_url || "/placeholder.svg"}
+                          alt={post.users?.username || "User"}
+                          width={40}
+                          height={40}
+                          className="rounded-full"
+                        />
+                        <div className="text-right">
+                          <p className="font-medium text-sm">{post.users?.username || "Unknown"}</p>
+                          <Button size="sm" variant="outline" className="mt-1 bg-transparent">
+                            <MessageCircle className="h-3 w-3 mr-1" />
+                            Написать
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                    <div className="col-span-1 md:col-span-3">
-                      <span className="font-medium">{post.event}</span>
-                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-600">Мероприятие:</span>
+                      </div>
+                      <div className="col-span-1 md:col-span-3">
+                        <span className="font-medium">{post.event_name}</span>
+                      </div>
 
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-gray-400" />
-                      <span className="text-gray-600">Нужно людей:</span>
-                    </div>
-                    <div>
-                      <span className="font-medium">{post.needed}</span>
-                    </div>
+                      <div className="flex items-center gap-2">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        <span className="text-gray-600">Нужно людей:</span>
+                      </div>
+                      <div>
+                        <span className="font-medium">{post.needed_members}</span>
+                      </div>
 
-                    <div className="text-gray-600">Возраст:</div>
-                    <div>
-                      <span className="font-medium">{post.ageLimit}</span>
+                      <div className="text-gray-600">Возраст:</div>
+                      <div>
+                        <span className="font-medium">{post.age_limit || "Не указан"}</span>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
 
           <div className="text-center mt-8">
@@ -311,6 +271,7 @@ export default function TeamPage() {
           </div>
         </div>
       </footer>
+      
     </div>
   )
 }

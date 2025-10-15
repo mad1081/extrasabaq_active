@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { Header } from "@/components/Header"
 import { Target, Lightbulb, Heart, Mail, Linkedin, Github } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -50,52 +51,7 @@ const teamMembers = [
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link href="/">
-                <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/WhatsApp%20Image%202025-07-24%20at%2017.14.15-7secNVv7zKkZaAXllG16x72eGCoEmg.jpeg"
-                  alt="Extrasabaq Logo"
-                  width={120}
-                  height={40}
-                  className="h-10 w-auto"
-                />
-              </Link>
-            </div>
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/" className="text-gray-700 hover:text-pink-500 font-medium">
-                Главная
-              </Link>
-              <Link href="/team" className="text-gray-700 hover:text-orange-500 font-medium">
-                Команда
-              </Link>
-              <Link href="/community" className="text-gray-700 hover:text-green-500 font-medium">
-                Сообщество
-              </Link>
-              <Link href="/profile" className="text-gray-700 hover:text-blue-500 font-medium">
-                Профиль
-              </Link>
-              <Link href="/about" className="text-purple-500 font-medium">
-                О нас
-              </Link>
-            </nav>
-            <div className="flex items-center space-x-4">
-              <Button variant="outline" size="sm">
-                Войти
-              </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-              >
-                Регистрация
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-16 px-4">

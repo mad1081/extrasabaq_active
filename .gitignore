@@ -26,3 +26,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# development and testing files
+test-setup.md
+SETUP.md
+/auth_form/
