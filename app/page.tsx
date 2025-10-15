@@ -255,23 +255,23 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Навигация</h4>
               <ul className="space-y-2 text-gray-400">
                 <li>
-                  <Link href="/" className="hover:text-white">
-                    Главная
+                  <Link href="/" className="hover:text-white" prefetch={false}>
+                    Home
                   </Link>
                 </li>
                 <li>
                   <Link href="/team" className="hover:text-white" prefetch={false}>
-                    Команды
+                    Team
                   </Link>
                 </li>
                 <li>
                   <Link href="/community" className="hover:text-white" prefetch={false}>
-                    Сообщество
+                    Community
                   </Link>
                 </li>
                 <li>
                   <Link href="/profile" className="hover:text-white" prefetch={false}>
-                    Профиль
+                    Profile
                   </Link>
                 </li>
               </ul>

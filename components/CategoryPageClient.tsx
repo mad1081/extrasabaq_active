@@ -155,16 +155,16 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
                     Привет, {user.user_metadata?.full_name || user.email}!
                   </span>
                   <Link href="/profile" prefetch={false}>
-                    <Button variant="outline" size="sm">
-                      Профиль
-                    </Button>
+                  <Button variant="outline" size="sm">
+                    Profile
+                  </Button>
                   </Link>
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => signOut()}
                   >
-                    Выйти
+                    Sign Out
                   </Button>
                 </>
               ) : (
@@ -177,7 +177,7 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
                       setAuthModalOpen(true)
                     }}
                   >
-                    Войти
+                    Login
                   </Button>
                   <Button
                     size="sm"
@@ -187,7 +187,7 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
                       setAuthModalOpen(true)
                     }}
                   >
-                    Регистрация
+                    Register
                   </Button>
                 </>
               )}
@@ -446,22 +446,22 @@ export function CategoryPageClient({ slug, categoryData, activeCompetitions, pas
               <ul className="space-y-2 text-gray-400">
                 <li>
                   <Link href="/" className="hover:text-white" prefetch={false}>
-                    Главная
+                    Home
                   </Link>
                 </li>
                 <li>
                   <Link href="/team" className="hover:text-white" prefetch={false}>
-                    Команды
+                    Team
                   </Link>
                 </li>
                 <li>
                   <Link href="/community" className="hover:text-white" prefetch={false}>
-                    Сообщество
+                    Community
                   </Link>
                 </li>
                 <li>
                   <Link href="/profile" className="hover:text-white" prefetch={false}>
-                    Профиль
+                    Profile
                   </Link>
                 </li>
               </ul>

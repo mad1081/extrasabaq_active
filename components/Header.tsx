@@ -53,16 +53,16 @@ export function Header() {
                     Привет, {user.user_metadata?.full_name || user.email}!
                   </span>
                   <Link href="/profile" prefetch={false}>
-                    <Button variant="outline" size="sm">
-                      Профиль
-                    </Button>
+                  <Button variant="outline" size="sm">
+                    Profile
+                  </Button>
                   </Link>
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => signOut()}
                   >
-                    Выйти
+                    Sign Out
                   </Button>
                 </>
               ) : (
@@ -75,7 +75,7 @@ export function Header() {
                       setAuthModalOpen(true)
                     }}
                   >
-                    Войти
+                    Login
                   </Button>
                   <Button
                     size="sm"
@@ -85,7 +85,7 @@ export function Header() {
                       setAuthModalOpen(true)
                     }}
                   >
-                    Регистрация
+                    Register
                   </Button>
                 </>
               )}
